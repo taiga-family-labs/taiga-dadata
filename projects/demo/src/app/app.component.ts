@@ -8,7 +8,7 @@ import {TuiChevron, TuiComboBox, TuiDataListWrapper} from '@taiga-ui/kit';
 import {
     TuiDaDataService,
     type TuiDaDataAddressSuggestion,
-} from '@taiga-ui/dadata';
+} from '@taiga-ui-labs/dadata';
 import {
     catchError,
     debounceTime,
