@@ -29,16 +29,63 @@ bootstrapApplication(AppComponent, {
 });
 ```
 
+Получить подсказки можно через `TuiDaDataService`:
+
 ```ts
 import {inject} from '@angular/core';
-import {TuiDaDataService} from '@taiga-ui-labs/dadata';
+import {
+    TuiDaDataService,
+    type TuiDaDataAddressSuggestion,
+} from '@taiga-ui-labs/dadata';
 
 const dadata = inject(TuiDaDataService);
 
-const suggestions$ = dadata.suggestAddress({
+protected value: TuiDaDataAddressSuggestion | string | null = null;
+
+protected readonly stringify = ({value}: TuiDaDataAddressSuggestion): string => value;
+
+protected readonly suggestions$ = dadata.suggestAddress({
     query: 'Москва, Тверская',
     count: 10,
 });
+```
+
+### Использование в шаблоне
+
+Результат `suggestAddress` можно передать в стандартный `tuiComboBox`:
+
+```html
+@let response = suggestions$ | async;
+
+<tui-textfield
+    tuiChevron
+    [stringify]="stringify"
+>
+    <input
+        tuiComboBox
+        [(ngModel)]="value"
+        [strict]="false"
+    />
+
+    <tui-data-list-wrapper
+        *tuiDropdown
+        [itemContent]="item"
+        [items]="response?.suggestions ?? []"
+    />
+</tui-textfield>
+
+<ng-template
+    #item
+    let-suggestion
+>
+    <div>
+        <strong>{{ suggestion.value }}</strong>
+
+        @if (suggestion.data.postal_code) {
+            <small>{{ suggestion.data.postal_code }}</small>
+        }
+    </div>
+</ng-template>
 ```
 
 Если токен может меняться во время работы приложения, можно передать функцию:
@@ -63,8 +110,6 @@ npm run build
 ## GitHub Pages
 
 `.github/workflows/pages.yml` собирает демо с `/taiga-dadata/` в качестве `base href` и публикует `dist/demo` через GitHub Pages Actions.
-
-Если GitHub Pages еще не включен для репозитория, один раз выберите **Settings → Pages → Build and deployment → Source → GitHub Actions**.
 
 ## Возможности
 
