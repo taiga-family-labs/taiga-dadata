@@ -8,6 +8,8 @@ GitHub Pages: https://taiga-family-labs.github.io/taiga-dadata/
 
 Для работы демо нужно указать API-токен DaData. После успешной проверки токен сохраняется в `localStorage` браузера и автоматически восстанавливается после перезагрузки страницы. Токен не попадает в сборку приложения.
 
+<img width="718" height="683" alt="image" src="https://github.com/user-attachments/assets/fb49198d-20a6-4c88-9bfa-c37f298ad446" />
+
 ## Установка
 
 ```bash
