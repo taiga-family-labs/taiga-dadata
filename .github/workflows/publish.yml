@@ -37,6 +37,11 @@ jobs:
       - run: npm run build:lib
 
       - name: Publish package
-        run: npm publish ./dist/taiga-dadata --access public --provenance
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          if [[ -n "$NPM_TOKEN" ]]; then
+            export NODE_AUTH_TOKEN="$NPM_TOKEN"
+          fi
+
+          npm publish ./dist/taiga-dadata --access public --provenance
