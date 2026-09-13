@@ -1,5 +1,7 @@
 # Taiga DaData
 
+[![npm version](https://img.shields.io/npm/v/%40taiga-ui-labs%2Fdadata.svg)](https://www.npmjs.com/package/@taiga-ui-labs/dadata)
+
 Интеграция API DaData для Angular и Taiga UI.
 
 ## Демо
