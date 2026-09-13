@@ -35,6 +35,10 @@ jobs:
 
       - run: npm run typecheck
       - run: npm run build:lib
+
+      - name: Add README to package
+        run: cp README.md dist/taiga-dadata/README.md
+
       - run: npm pack ./dist/taiga-dadata --dry-run
 
       - name: Publish package
