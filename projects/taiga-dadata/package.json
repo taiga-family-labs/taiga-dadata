@@ -1,8 +1,19 @@
 {
-  "name": "@taiga-ui/dadata",
+  "name": "@taiga-ui-labs/dadata",
   "version": "0.0.0",
   "description": "DaData API integration for Taiga UI",
   "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/taiga-family-labs/taiga-dadata.git"
+  },
+  "homepage": "https://taiga-family-labs.github.io/taiga-dadata/",
+  "bugs": {
+    "url": "https://github.com/taiga-family-labs/taiga-dadata/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "peerDependencies": {
     "@angular/common": ">=19.0.0",
     "@angular/core": ">=19.0.0",
