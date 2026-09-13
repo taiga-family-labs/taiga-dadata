@@ -91,21 +91,21 @@ export class AppComponent {
 
     protected emptyContent(query: string): string {
         if (!this.token()) {
-            return 'Enter a DaData API token first';
+            return 'Сначала укажите API-токен DaData';
         }
 
-        return query.length < 2 ? 'Enter at least 2 characters' : 'Nothing found';
+        return query.length < 2 ? 'Введите минимум 2 символа' : 'Ничего не найдено';
     }
 
     private getErrorMessage(error: HttpErrorResponse): string {
         if (error.status === 401 || error.status === 403) {
-            return 'DaData rejected the API token. Check the token and account limits.';
+            return 'DaData отклонила API-токен. Проверьте токен и ограничения аккаунта.';
         }
 
         if (error.status === 429) {
-            return 'Too many requests. Try again in a moment.';
+            return 'Слишком много запросов. Попробуйте еще раз через некоторое время.';
         }
 
-        return 'DaData request failed. Check the network and try again.';
+        return 'Не удалось выполнить запрос к DaData. Проверьте соединение и попробуйте снова.';
     }
 }
