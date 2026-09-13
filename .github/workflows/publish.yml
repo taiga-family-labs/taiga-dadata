@@ -35,6 +35,7 @@ jobs:
 
       - run: npm run typecheck
       - run: npm run build:lib
+      - run: npm pack ./dist/taiga-dadata --dry-run
 
       - name: Publish package
         env:
