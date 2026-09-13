@@ -74,14 +74,7 @@ Publishing is handled by `.github/workflows/publish.yml` when a GitHub Release i
 
 For the first publication, add a repository secret named `NPM_TOKEN` with write access to the `@taiga-ui-labs` npm scope. npm currently requires the package to exist before Trusted Publishing can be configured.
 
-After the first publication, configure npm Trusted Publishing for:
-
-- GitHub organization: `taiga-family-labs`
-- Repository: `taiga-dadata`
-- Workflow: `publish.yml`
-- Allowed action: `npm publish`
-
-Then `NPM_TOKEN` can be removed; the same workflow can publish through GitHub Actions OIDC.
+After the first publication, configure npm Trusted Publishing with GitHub organization `taiga-family-labs`, repository `taiga-dadata`, workflow `publish.yml`, and allowed action `npm publish`. Then `NPM_TOKEN` can be removed; the same workflow can publish through GitHub Actions OIDC.
 
 ## Scope
 
