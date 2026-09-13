@@ -12,7 +12,10 @@
             <header>
                 <div>
                     <h2>Подсказки адресов</h2>
-                    <p>Токен хранится только в памяти текущей вкладки браузера.</p>
+                    <p>
+                        После успешной проверки токен сохраняется в localStorage этого
+                        браузера.
+                    </p>
                 </div>
                 <a
                     href="https://dadata.ru/profile/#info"
@@ -25,16 +28,34 @@
 
             <label class="field-label">
                 API-токен DaData
-                <tui-textfield>
-                    <input
-                        autocomplete="off"
-                        placeholder="Вставьте API-токен"
-                        type="password"
-                        tuiInput
-                        [ngModel]="token()"
-                        (ngModelChange)="token.set($event)"
-                    />
-                </tui-textfield>
+                <span class="token-field">
+                    <tui-textfield>
+                        <input
+                            autocomplete="off"
+                            placeholder="Вставьте API-токен"
+                            type="password"
+                            tuiInput
+                            [ngModel]="token()"
+                            (ngModelChange)="onTokenChange($event)"
+                        />
+                    </tui-textfield>
+
+                    @if (tokenChecking()) {
+                        <tui-loader class="token-status" />
+                    } @else if (tokenValid()) {
+                        <span
+                            aria-label="API-токен действителен"
+                            class="token-status token-valid"
+                            role="img"
+                        >
+                            ✓
+                        </span>
+                    }
+                </span>
+
+                @if (tokenError()) {
+                    <small class="token-error">{{ tokenError() }}</small>
+                }
             </label>
 
             @let suggestions = suggestions$ | async;
