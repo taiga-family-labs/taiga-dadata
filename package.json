@@ -1,0 +1,52 @@
+{
+  "name": "taiga-dadata-workspace",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start": "ng serve demo",
+    "build": "npm run build:lib && npm run build:demo",
+    "build:lib": "ng-packagr -p projects/taiga-dadata/ng-package.json",
+    "build:demo": "ng build demo --configuration production --base-href /taiga-dadata/",
+    "typecheck": "tsc --noEmit -p projects/taiga-dadata/tsconfig.lib.json && tsc --noEmit -p projects/demo/tsconfig.app.json"
+  },
+  "dependencies": {
+    "@angular/animations": "19.2.25",
+    "@angular/cdk": "19.2.19",
+    "@angular/common": "19.2.25",
+    "@angular/core": "19.2.25",
+    "@angular/forms": "19.2.25",
+    "@angular/platform-browser": "19.2.25",
+    "@angular/platform-browser-dynamic": "19.2.25",
+    "@angular/router": "19.2.25",
+    "@maskito/angular": "5.3.1",
+    "@maskito/core": "5.3.1",
+    "@maskito/kit": "5.3.1",
+    "@maskito/phone": "5.3.1",
+    "@ng-web-apis/common": "5.3.0",
+    "@ng-web-apis/intersection-observer": "5.3.0",
+    "@ng-web-apis/mutation-observer": "5.3.0",
+    "@ng-web-apis/platform": "5.3.0",
+    "@ng-web-apis/resize-observer": "5.3.0",
+    "@taiga-ui/cdk": "5.23.0",
+    "@taiga-ui/core": "5.23.0",
+    "@taiga-ui/event-plugins": "5.0.0",
+    "@taiga-ui/i18n": "5.23.0",
+    "@taiga-ui/icons": "5.23.0",
+    "@taiga-ui/kit": "5.23.0",
+    "@taiga-ui/polymorpheus": "5.0.1",
+    "@taiga-ui/styles": "5.23.0",
+    "rxjs": "7.8.2",
+    "tslib": "2.8.1",
+    "zone.js": "0.15.1"
+  },
+  "devDependencies": {
+    "@angular-devkit/build-angular": "19.2.27",
+    "@angular/cli": "19.2.27",
+    "@angular/compiler-cli": "19.2.25",
+    "ng-packagr": "19.2.2",
+    "typescript": "5.8.3"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

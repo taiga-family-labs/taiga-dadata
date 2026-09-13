@@ -1,0 +1,120 @@
+:host {
+    display: block;
+}
+
+.page {
+    width: min(46rem, calc(100% - 2rem));
+    margin: 0 auto;
+    padding: 4rem 0 2rem;
+}
+
+.hero {
+    margin-bottom: 2rem;
+
+    h1 {
+        margin: 0.25rem 0 0.75rem;
+        font-size: clamp(2.5rem, 8vw, 4.5rem);
+        line-height: 1;
+        letter-spacing: -0.04em;
+    }
+
+    p {
+        max-width: 38rem;
+        margin: 0;
+        color: var(--tui-text-secondary);
+        font-size: 1.125rem;
+        line-height: 1.5;
+    }
+}
+
+.eyebrow {
+    color: var(--tui-text-tertiary);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.demo {
+    padding: 1.5rem;
+    border: 1px solid var(--tui-border-normal);
+    border-radius: 1.5rem;
+    background: var(--tui-background-base);
+    box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.08);
+
+    header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+
+        h2,
+        p {
+            margin: 0;
+        }
+
+        p {
+            margin-top: 0.25rem;
+            color: var(--tui-text-secondary);
+        }
+    }
+}
+
+.field-label {
+    display: grid;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    font-weight: 600;
+}
+
+.error {
+    margin: 0.75rem 0 0;
+    color: var(--tui-status-negative);
+}
+
+.result {
+    margin-top: 1.5rem;
+
+    h3 {
+        margin: 0 0 0.5rem;
+    }
+
+    pre {
+        overflow: auto;
+        max-height: 22rem;
+        margin: 0;
+        padding: 1rem;
+        border-radius: 1rem;
+        background: var(--tui-background-neutral-1);
+        font-size: 0.75rem;
+        line-height: 1.5;
+    }
+}
+
+.suggestion {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+
+    small {
+        color: var(--tui-text-secondary);
+    }
+}
+
+footer {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 2rem;
+    color: var(--tui-text-secondary);
+}
+
+@media (max-width: 40rem) {
+    .page {
+        padding-top: 2rem;
+    }
+
+    .demo header {
+        flex-direction: column;
+    }
+}

@@ -10,14 +10,16 @@ The demo asks for a DaData API token at runtime. The token is kept only in memor
 
 ## Install
 
-The package is not published yet. During development the workspace exposes it as `@taiga-ui/dadata`.
+```bash
+npm i @taiga-ui-labs/dadata
+```
 
 ## Usage
 
 ```ts
 import {provideHttpClient} from '@angular/common/http';
 import {bootstrapApplication} from '@angular/platform-browser';
-import {provideTuiDaData} from '@taiga-ui/dadata';
+import {provideTuiDaData} from '@taiga-ui-labs/dadata';
 
 bootstrapApplication(AppComponent, {
     providers: [
@@ -29,7 +31,7 @@ bootstrapApplication(AppComponent, {
 
 ```ts
 import {inject} from '@angular/core';
-import {TuiDaDataService} from '@taiga-ui/dadata';
+import {TuiDaDataService} from '@taiga-ui-labs/dadata';
 
 const dadata = inject(TuiDaDataService);
 
@@ -48,7 +50,7 @@ provideTuiDaData({token: () => tokenSignal()});
 ## Development
 
 ```bash
-npm install
+npm ci
 npm start
 ```
 
@@ -63,6 +65,16 @@ npm run build
 `.github/workflows/pages.yml` builds the demo with `/taiga-dadata/` as the base href and deploys `dist/demo` using the official GitHub Pages Actions flow.
 
 If Pages has not been enabled for the repository yet, select **Settings → Pages → Build and deployment → Source → GitHub Actions** once.
+
+## Publishing
+
+The library package is published as `@taiga-ui-labs/dadata`. The package manifest sets `publishConfig.access` to `public` so the scoped package can be published publicly to npm.
+
+Publishing is handled by `.github/workflows/publish.yml` when a GitHub Release is published. Use a semver tag prefixed with `v`, for example `v0.1.0`. The committed `0.0.0` version is only a development placeholder: the workflow derives the real package version from the release tag, runs type checking, builds the library, checks the package contents with `npm pack --dry-run`, and publishes `dist/taiga-dadata` with npm provenance.
+
+For the first publication, add a repository secret named `NPM_TOKEN` with write access to the `@taiga-ui-labs` npm scope. npm currently requires the package to exist before Trusted Publishing can be configured.
+
+After the first publication, configure npm Trusted Publishing with GitHub organization `taiga-family-labs`, repository `taiga-dadata`, workflow `publish.yml`, and allowed action `npm publish`. Then `NPM_TOKEN` can be removed; the same workflow can publish through GitHub Actions OIDC.
 
 ## Scope
 
