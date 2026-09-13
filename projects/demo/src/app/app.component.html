@@ -4,32 +4,31 @@
             <span class="eyebrow">Taiga UI Labs</span>
             <h1>Taiga DaData</h1>
             <p>
-                Headless DaData API integration for Angular with a Taiga UI autocomplete
-                example.
+                Интеграция API DaData для Angular с примером автодополнения на Taiga UI.
             </p>
         </section>
 
         <section class="demo">
             <header>
                 <div>
-                    <h2>Address suggestions</h2>
-                    <p>Your token stays in this browser tab and is never stored by the demo.</p>
+                    <h2>Подсказки адресов</h2>
+                    <p>Токен хранится только в памяти текущей вкладки браузера.</p>
                 </div>
                 <a
                     href="https://dadata.ru/profile/#info"
                     rel="noreferrer"
                     target="_blank"
                 >
-                    Get DaData token
+                    Получить токен DaData
                 </a>
             </header>
 
             <label class="field-label">
-                DaData API token
+                API-токен DaData
                 <tui-textfield>
                     <input
                         autocomplete="off"
-                        placeholder="Paste API token"
+                        placeholder="Вставьте API-токен"
                         type="password"
                         tuiInput
                         [ngModel]="token()"
@@ -41,14 +40,14 @@
             @let suggestions = suggestions$ | async;
 
             <label class="field-label">
-                Address
+                Адрес
                 <tui-textfield
                     tuiChevron
                     [stringify]="stringify"
                 >
                     <input
                         #addressInput
-                        placeholder="Moscow, Tverskaya 1"
+                        placeholder="Москва, Тверская, 1"
                         tuiComboBox
                         [(ngModel)]="value"
                         [strict]="false"
@@ -74,7 +73,7 @@
 
             @if (isSuggestion(value)) {
                 <section class="result">
-                    <h3>Selected suggestion</h3>
+                    <h3>Выбранная подсказка</h3>
                     <pre>{{ value | json }}</pre>
                 </section>
             }
