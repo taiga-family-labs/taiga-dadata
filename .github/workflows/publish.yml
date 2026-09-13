@@ -38,11 +38,4 @@ jobs:
       - run: npm pack ./dist/taiga-dadata --dry-run
 
       - name: Publish package
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: |
-          if [[ -n "$NPM_TOKEN" ]]; then
-            export NODE_AUTH_TOKEN="$NPM_TOKEN"
-          fi
-
-          npm publish ./dist/taiga-dadata --access public --provenance
+        run: npm publish ./dist/taiga-dadata --access public
