@@ -1,20 +1,20 @@
 # Taiga DaData
 
-DaData API integration for Angular and Taiga UI.
+Интеграция API DaData для Angular и Taiga UI.
 
-## Demo
+## Демо
 
 GitHub Pages: https://taiga-family-labs.github.io/taiga-dadata/
 
-The demo asks for a DaData API token at runtime. The token is kept only in memory and is not committed or bundled into the application.
+Для работы демо нужно указать API-токен DaData. Токен хранится только в памяти текущей вкладки браузера, не сохраняется и не попадает в сборку приложения.
 
-## Install
+## Установка
 
 ```bash
 npm i @taiga-ui-labs/dadata
 ```
 
-## Usage
+## Использование
 
 ```ts
 import {provideHttpClient} from '@angular/common/http';
@@ -29,32 +29,79 @@ bootstrapApplication(AppComponent, {
 });
 ```
 
+Получить подсказки можно через `TuiDaDataService`:
+
 ```ts
 import {inject} from '@angular/core';
-import {TuiDaDataService} from '@taiga-ui-labs/dadata';
+import {
+    TuiDaDataService,
+    type TuiDaDataAddressSuggestion,
+} from '@taiga-ui-labs/dadata';
 
 const dadata = inject(TuiDaDataService);
 
-const suggestions$ = dadata.suggestAddress({
-    query: 'Moscow Tverskaya',
+protected value: TuiDaDataAddressSuggestion | string | null = null;
+
+protected readonly stringify = ({value}: TuiDaDataAddressSuggestion): string => value;
+
+protected readonly suggestions$ = dadata.suggestAddress({
+    query: 'Москва, Тверская',
     count: 10,
 });
 ```
 
-A token getter is also supported for applications where the token can change at runtime:
+### Использование в шаблоне
+
+Результат `suggestAddress` можно передать в стандартный `tuiComboBox`:
+
+```html
+@let response = suggestions$ | async;
+
+<tui-textfield
+    tuiChevron
+    [stringify]="stringify"
+>
+    <input
+        tuiComboBox
+        [(ngModel)]="value"
+        [strict]="false"
+    />
+
+    <tui-data-list-wrapper
+        *tuiDropdown
+        [itemContent]="item"
+        [items]="response?.suggestions ?? []"
+    />
+</tui-textfield>
+
+<ng-template
+    #item
+    let-suggestion
+>
+    <div>
+        <strong>{{ suggestion.value }}</strong>
+
+        @if (suggestion.data.postal_code) {
+            <small>{{ suggestion.data.postal_code }}</small>
+        }
+    </div>
+</ng-template>
+```
+
+Если токен может меняться во время работы приложения, можно передать функцию:
 
 ```ts
 provideTuiDaData({token: () => tokenSignal()});
 ```
 
-## Development
+## Разработка
 
 ```bash
 npm ci
 npm start
 ```
 
-Build everything:
+Сборка библиотеки и демо:
 
 ```bash
 npm run build
@@ -62,20 +109,8 @@ npm run build
 
 ## GitHub Pages
 
-`.github/workflows/pages.yml` builds the demo with `/taiga-dadata/` as the base href and deploys `dist/demo` using the official GitHub Pages Actions flow.
+`.github/workflows/pages.yml` собирает демо с `/taiga-dadata/` в качестве `base href` и публикует `dist/demo` через GitHub Pages Actions.
 
-If Pages has not been enabled for the repository yet, select **Settings → Pages → Build and deployment → Source → GitHub Actions** once.
+## Возможности
 
-## Publishing
-
-The library package is published as `@taiga-ui-labs/dadata`. The package manifest sets `publishConfig.access` to `public` so the scoped package can be published publicly to npm.
-
-Publishing is handled by `.github/workflows/publish.yml` when a GitHub Release is published. Use a semver tag prefixed with `v`, for example `v0.1.0`. The committed `0.0.0` version is only a development placeholder: the workflow derives the real package version from the release tag, runs type checking, builds the library, checks the package contents with `npm pack --dry-run`, and publishes `dist/taiga-dadata` with npm provenance.
-
-For the first publication, add a repository secret named `NPM_TOKEN` with write access to the `@taiga-ui-labs` npm scope. npm currently requires the package to exist before Trusted Publishing can be configured.
-
-After the first publication, configure npm Trusted Publishing with GitHub organization `taiga-family-labs`, repository `taiga-dadata`, workflow `publish.yml`, and allowed action `npm publish`. Then `NPM_TOKEN` can be removed; the same workflow can publish through GitHub Actions OIDC.
-
-## Scope
-
-The first version focuses on address suggestions. The service already has a generic `suggest<T>(type, request)` method so typed integrations for FIO, organizations, banks and other DaData suggestion APIs can be added without introducing new UI components.
+Первая версия предоставляет подсказки адресов. В сервисе также есть универсальный метод `suggest<T>(type, request)`, поэтому позже можно добавить типизированную поддержку ФИО, организаций, банков и других API подсказок DaData без создания отдельных UI-компонентов.
