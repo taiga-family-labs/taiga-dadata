@@ -1,0 +1,103 @@
+<tui-root>
+    <main class="page">
+        <section class="hero">
+            <span class="eyebrow">Taiga UI Labs</span>
+            <h1>Taiga DaData</h1>
+            <p>
+                Headless DaData API integration for Angular with a Taiga UI autocomplete
+                example.
+            </p>
+        </section>
+
+        <section class="demo">
+            <header>
+                <div>
+                    <h2>Address suggestions</h2>
+                    <p>Your token stays in this browser tab and is never stored by the demo.</p>
+                </div>
+                <a
+                    href="https://dadata.ru/profile/#info"
+                    rel="noreferrer"
+                    target="_blank"
+                >
+                    Get DaData token
+                </a>
+            </header>
+
+            <label class="field-label">
+                DaData API token
+                <tui-textfield>
+                    <input
+                        autocomplete="off"
+                        placeholder="Paste API token"
+                        type="password"
+                        tuiInput
+                        [ngModel]="token()"
+                        (ngModelChange)="token.set($event)"
+                    />
+                </tui-textfield>
+            </label>
+
+            @let suggestions = suggestions$ | async;
+
+            <label class="field-label">
+                Address
+                <tui-textfield
+                    tuiChevron
+                    [stringify]="stringify"
+                >
+                    <input
+                        #addressInput
+                        placeholder="Moscow, Tverskaya 1"
+                        tuiComboBox
+                        [(ngModel)]="value"
+                        [strict]="false"
+                        (input)="search$.next(addressInput.value)"
+                    />
+
+                    <tui-data-list-wrapper
+                        *tuiDropdown
+                        [emptyContent]="emptyContent(addressInput.value)"
+                        [itemContent]="item"
+                        [items]="suggestions"
+                    />
+
+                    @if (loading()) {
+                        <tui-loader />
+                    }
+                </tui-textfield>
+            </label>
+
+            @if (error()) {
+                <p class="error">{{ error() }}</p>
+            }
+
+            @if (isSuggestion(value)) {
+                <section class="result">
+                    <h3>Selected suggestion</h3>
+                    <pre>{{ value | json }}</pre>
+                </section>
+            }
+        </section>
+
+        <footer>
+            <a href="https://github.com/taiga-family-labs/taiga-dadata">GitHub</a>
+            <span>·</span>
+            <a href="https://taiga-ui.dev">Taiga UI</a>
+            <span>·</span>
+            <a href="https://dadata.ru/api/suggest/address/">DaData API</a>
+        </footer>
+    </main>
+
+    <ng-template
+        #item
+        let-suggestion
+    >
+        <div class="suggestion">
+            <strong>{{ suggestion.value }}</strong>
+            @if (suggestion.data.postal_code) {
+                <small>{{ suggestion.data.postal_code }}</small>
+            }
+        </div>
+    </ng-template>
+</tui-root>
