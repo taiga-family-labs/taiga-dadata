@@ -11,7 +11,7 @@
         <section class="demo">
             <header>
                 <div>
-                    <h2>Подсказки адресов</h2>
+                    <h2>Подсказки DaData</h2>
                     <p>
                         После успешной проверки токен сохраняется в localStorage этого
                         браузера.
@@ -58,26 +58,44 @@
                 }
             </label>
 
+            <div
+                aria-label="Тип подсказок"
+                class="suggestion-types"
+                role="group"
+            >
+                @for (type of suggestionTypes; track type.id) {
+                    <button
+                        class="suggestion-type"
+                        type="button"
+                        [attr.aria-pressed]="suggestionType() === type.id"
+                        [class.suggestion-type_active]="suggestionType() === type.id"
+                        (click)="selectSuggestionType(type.id)"
+                    >
+                        {{ type.label }}
+                    </button>
+                }
+            </div>
+
             @let suggestions = suggestions$ | async;
 
             <label class="field-label">
-                Адрес
+                {{ suggestionTypeConfig().label }}
                 <tui-textfield
                     tuiChevron
                     [stringify]="stringify"
                 >
                     <input
-                        #addressInput
-                        placeholder="Москва, Тверская, 1"
+                        #suggestionInput
                         tuiComboBox
                         [(ngModel)]="value"
+                        [placeholder]="suggestionTypeConfig().placeholder"
                         [strict]="false"
-                        (input)="search$.next(addressInput.value)"
+                        (input)="search$.next(suggestionInput.value)"
                     />
 
                     <tui-data-list-wrapper
                         *tuiDropdown
-                        [emptyContent]="emptyContent(addressInput.value)"
+                        [emptyContent]="emptyContent(suggestionInput.value)"
                         [itemContent]="item"
                         [items]="suggestions"
                     />
@@ -105,7 +123,7 @@
             <span>·</span>
             <a href="https://taiga-ui.dev">Taiga UI</a>
             <span>·</span>
-            <a href="https://dadata.ru/api/suggest/address/">DaData API</a>
+            <a href="https://dadata.ru/api/suggest/">DaData API</a>
         </footer>
     </main>
 
@@ -115,8 +133,8 @@
     >
         <div class="suggestion">
             <strong>{{ suggestion.value }}</strong>
-            @if (suggestion.data.postal_code) {
-                <small>{{ suggestion.data.postal_code }}</small>
+            @if (suggestionMeta(suggestion)) {
+                <small>{{ suggestionMeta(suggestion) }}</small>
             }
         </div>
     </ng-template>
