@@ -10,14 +10,16 @@ The demo asks for a DaData API token at runtime. The token is kept only in memor
 
 ## Install
 
-The package is not published yet. During development the workspace exposes it as `@taiga-ui/dadata`.
+```bash
+npm i @taiga-ui-labs/dadata
+```
 
 ## Usage
 
 ```ts
 import {provideHttpClient} from '@angular/common/http';
 import {bootstrapApplication} from '@angular/platform-browser';
-import {provideTuiDaData} from '@taiga-ui/dadata';
+import {provideTuiDaData} from '@taiga-ui-labs/dadata';
 
 bootstrapApplication(AppComponent, {
     providers: [
@@ -29,7 +31,7 @@ bootstrapApplication(AppComponent, {
 
 ```ts
 import {inject} from '@angular/core';
-import {TuiDaDataService} from '@taiga-ui/dadata';
+import {TuiDaDataService} from '@taiga-ui-labs/dadata';
 
 const dadata = inject(TuiDaDataService);
 
@@ -48,7 +50,7 @@ provideTuiDaData({token: () => tokenSignal()});
 ## Development
 
 ```bash
-npm install
+npm ci
 npm start
 ```
 
@@ -63,6 +65,10 @@ npm run build
 `.github/workflows/pages.yml` builds the demo with `/taiga-dadata/` as the base href and deploys `dist/demo` using the official GitHub Pages Actions flow.
 
 If Pages has not been enabled for the repository yet, select **Settings → Pages → Build and deployment → Source → GitHub Actions** once.
+
+## Publishing
+
+The library package is published as `@taiga-ui-labs/dadata`. The package manifest sets `publishConfig.access` to `public` so the scoped package can be published publicly to npm.
 
 ## Scope
 
