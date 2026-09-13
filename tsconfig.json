@@ -3,7 +3,7 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@taiga-ui/dadata": ["projects/taiga-dadata/src/public-api.ts"]
+      "@taiga-ui-labs/dadata": ["projects/taiga-dadata/src/public-api.ts"]
     },
     "outDir": "./dist/out-tsc",
     "forceConsistentCasingInFileNames": true,
