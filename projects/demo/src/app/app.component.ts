@@ -1,6 +1,12 @@
 import {AsyncPipe, JsonPipe} from '@angular/common';
 import {HttpErrorResponse} from '@angular/common/http';
-import {ChangeDetectionStrategy, Component, inject, signal} from '@angular/core';
+import {
+    ChangeDetectionStrategy,
+    Component,
+    computed,
+    inject,
+    signal,
+} from '@angular/core';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {FormsModule} from '@angular/forms';
 import {type TuiStringHandler} from '@taiga-ui/cdk';
@@ -9,6 +15,9 @@ import {TuiChevron, TuiComboBox, TuiDataListWrapper} from '@taiga-ui/kit';
 import {
     TuiDaDataService,
     type TuiDaDataAddressSuggestion,
+    type TuiDaDataBankSuggestion,
+    type TuiDaDataFioSuggestion,
+    type TuiDaDataPartySuggestion,
 } from '@taiga-ui-labs/dadata';
 import {
     catchError,
@@ -18,6 +27,7 @@ import {
     filter,
     finalize,
     map,
+    type Observable,
     of,
     shareReplay,
     Subject,
@@ -29,6 +39,19 @@ import {
 import {DADATA_TOKEN} from './dadata-token';
 
 const DADATA_TOKEN_STORAGE_KEY = 'taiga-dadata-token';
+const SUGGESTION_TYPES = [
+    {id: 'address', label: 'Адрес', placeholder: 'Москва, Тверская, 1'},
+    {id: 'fio', label: 'ФИО', placeholder: 'Иванов Иван Иванович'},
+    {id: 'party', label: 'Организация', placeholder: 'Сбербанк'},
+    {id: 'bank', label: 'Банк', placeholder: 'Сбербанк'},
+] as const;
+
+type SuggestionType = (typeof SUGGESTION_TYPES)[number]['id'];
+type Suggestion =
+    | TuiDaDataAddressSuggestion
+    | TuiDaDataBankSuggestion
+    | TuiDaDataFioSuggestion
+    | TuiDaDataPartySuggestion;
 
 @Component({
     selector: 'app-root',
@@ -51,6 +74,13 @@ export class AppComponent {
     private readonly dadata = inject(TuiDaDataService);
     private readonly tokenChanges$ = new Subject<string>();
 
+    protected readonly suggestionTypes = SUGGESTION_TYPES;
+    protected readonly suggestionType = signal<SuggestionType>('address');
+    protected readonly suggestionTypeConfig = computed(
+        () =>
+            SUGGESTION_TYPES.find(({id}) => id === this.suggestionType()) ??
+            SUGGESTION_TYPES[0],
+    );
     protected readonly token = DADATA_TOKEN;
     protected readonly tokenValid = signal(false);
     protected readonly tokenChecking = signal(false);
@@ -59,10 +89,9 @@ export class AppComponent {
     protected readonly error = signal('');
     protected readonly search$ = new Subject<string>();
 
-    protected value: TuiDaDataAddressSuggestion | string | null = null;
+    protected value: Suggestion | string | null = null;
 
-    protected readonly stringify: TuiStringHandler<TuiDaDataAddressSuggestion> =
-        ({value}) => value;
+    protected readonly stringify: TuiStringHandler<Suggestion> = ({value}) => value;
 
     protected readonly suggestions$ = this.search$.pipe(
         debounceTime(0),
@@ -74,18 +103,17 @@ export class AppComponent {
             if (query.length < 2 || !this.tokenValid()) {
                 this.error.set('');
 
-                return of([]);
+                return of<readonly Suggestion[]>([]);
             }
 
             this.loading.set(true);
             this.error.set('');
 
-            return this.dadata.suggestAddress({query, count: 10}).pipe(
-                map(({suggestions}) => suggestions),
+            return this.getSuggestions(query).pipe(
                 catchError((error: HttpErrorResponse) => {
                     this.error.set(this.getErrorMessage(error));
 
-                    return of([]);
+                    return of<readonly Suggestion[]>([]);
                 }),
                 finalize(() => this.loading.set(false)),
             );
@@ -138,6 +166,17 @@ export class AppComponent {
         }
     }
 
+    protected selectSuggestionType(type: SuggestionType): void {
+        if (type === this.suggestionType()) {
+            return;
+        }
+
+        this.suggestionType.set(type);
+        this.value = null;
+        this.error.set('');
+        this.search$.next('');
+    }
+
     protected onTokenChange(value: string): void {
         const token = value.trim();
 
@@ -152,10 +191,47 @@ export class AppComponent {
         this.tokenChanges$.next(token);
     }
 
-    protected isSuggestion(
-        value: TuiDaDataAddressSuggestion | string | null,
-    ): value is TuiDaDataAddressSuggestion {
+    protected isSuggestion(value: Suggestion | string | null): value is Suggestion {
         return Boolean(value && typeof value !== 'string');
+    }
+
+    protected suggestionMeta(suggestion: Suggestion): string {
+        switch (this.suggestionType()) {
+            case 'address': {
+                const {city, postal_code, region, settlement} = (
+                    suggestion as TuiDaDataAddressSuggestion
+                ).data;
+
+                return [postal_code, city ?? settlement ?? region].filter(Boolean).join(' · ');
+            }
+            case 'fio': {
+                const {gender} = (suggestion as TuiDaDataFioSuggestion).data;
+
+                if (gender === 'MALE') {
+                    return 'Мужской пол';
+                }
+
+                if (gender === 'FEMALE') {
+                    return 'Женский пол';
+                }
+
+                return '';
+            }
+            case 'party': {
+                const {inn, kpp} = (suggestion as TuiDaDataPartySuggestion).data;
+
+                return [inn && `ИНН ${inn}`, kpp && `КПП ${kpp}`]
+                    .filter(Boolean)
+                    .join(' · ');
+            }
+            case 'bank': {
+                const {bic, inn} = (suggestion as TuiDaDataBankSuggestion).data;
+
+                return [bic && `БИК ${bic}`, inn && `ИНН ${inn}`]
+                    .filter(Boolean)
+                    .join(' · ');
+            }
+        }
     }
 
     protected emptyContent(query: string): string {
@@ -170,6 +246,27 @@ export class AppComponent {
         }
 
         return query.length < 2 ? 'Введите минимум 2 символа' : 'Ничего не найдено';
+    }
+
+    private getSuggestions(query: string): Observable<readonly Suggestion[]> {
+        switch (this.suggestionType()) {
+            case 'address':
+                return this.dadata
+                    .suggestAddress({query, count: 10})
+                    .pipe(map(({suggestions}) => suggestions));
+            case 'fio':
+                return this.dadata
+                    .suggestFio({query, count: 10})
+                    .pipe(map(({suggestions}) => suggestions));
+            case 'party':
+                return this.dadata
+                    .suggestParty({query, count: 10, status: ['ACTIVE']})
+                    .pipe(map(({suggestions}) => suggestions));
+            case 'bank':
+                return this.dadata
+                    .suggestBank({query, count: 10, status: ['ACTIVE']})
+                    .pipe(map(({suggestions}) => suggestions));
+        }
     }
 
     private getTokenErrorMessage(error: HttpErrorResponse): string {

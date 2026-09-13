@@ -88,6 +88,31 @@ protected readonly suggestions$ = dadata.suggestAddress({
 </ng-template>
 ```
 
+### ФИО, организации и банки
+
+Для основных видов подсказок есть отдельные типизированные методы:
+
+```ts
+const fio$ = dadata.suggestFio({
+    query: 'Иванов Ив',
+    gender: 'MALE',
+    parts: ['SURNAME', 'NAME'],
+});
+
+const parties$ = dadata.suggestParty({
+    query: 'Сбербанк',
+    status: ['ACTIVE'],
+});
+
+const banks$ = dadata.suggestBank({
+    query: 'Сбербанк',
+    type: ['BANK'],
+    status: ['ACTIVE'],
+});
+```
+
+Ответы типизированы через `TuiDaDataFioData`, `TuiDaDataPartyData` и `TuiDaDataBankData`. Для нестандартных endpoints остается универсальный метод `suggest<T, R>(type, request)`.
+
 Если токен может меняться во время работы приложения, можно передать функцию:
 
 ```ts
@@ -113,4 +138,4 @@ npm run build
 
 ## Возможности
 
-Первая версия предоставляет подсказки адресов. В сервисе также есть универсальный метод `suggest<T>(type, request)`, поэтому позже можно добавить типизированную поддержку ФИО, организаций, банков и других API подсказок DaData без создания отдельных UI-компонентов.
+Библиотека предоставляет типизированные подсказки адресов, ФИО, организаций и банков. Для остальных API подсказок DaData можно использовать универсальный метод `suggest<T, R>(type, request)` без создания отдельных UI-компонентов.
