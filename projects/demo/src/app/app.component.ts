@@ -1,6 +1,7 @@
 import {AsyncPipe, JsonPipe} from '@angular/common';
 import {HttpErrorResponse} from '@angular/common/http';
 import {ChangeDetectionStrategy, Component, inject, signal} from '@angular/core';
+import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {FormsModule} from '@angular/forms';
 import {type TuiStringHandler} from '@taiga-ui/cdk';
 import {TuiInput, TuiLoader, TuiRoot} from '@taiga-ui/core';
@@ -13,6 +14,7 @@ import {
     catchError,
     debounceTime,
     distinctUntilChanged,
+    EMPTY,
     filter,
     finalize,
     map,
@@ -20,9 +22,13 @@ import {
     shareReplay,
     Subject,
     switchMap,
+    tap,
+    timer,
 } from 'rxjs';
 
 import {DADATA_TOKEN} from './dadata-token';
+
+const DADATA_TOKEN_STORAGE_KEY = 'taiga-dadata-token';
 
 @Component({
     selector: 'app-root',
@@ -43,8 +49,12 @@ import {DADATA_TOKEN} from './dadata-token';
 })
 export class AppComponent {
     private readonly dadata = inject(TuiDaDataService);
+    private readonly tokenChanges$ = new Subject<string>();
 
     protected readonly token = DADATA_TOKEN;
+    protected readonly tokenValid = signal(false);
+    protected readonly tokenChecking = signal(false);
+    protected readonly tokenError = signal('');
     protected readonly loading = signal(false);
     protected readonly error = signal('');
     protected readonly search$ = new Subject<string>();
@@ -61,7 +71,7 @@ export class AppComponent {
         debounceTime(300),
         distinctUntilChanged(),
         switchMap((query) => {
-            if (query.length < 2 || !this.token()) {
+            if (query.length < 2 || !this.tokenValid()) {
                 this.error.set('');
 
                 return of([]);
@@ -83,6 +93,65 @@ export class AppComponent {
         shareReplay({bufferSize: 1, refCount: true}),
     );
 
+    public constructor() {
+        this.tokenChanges$
+            .pipe(
+                distinctUntilChanged(),
+                switchMap((token) => {
+                    if (!token) {
+                        return EMPTY;
+                    }
+
+                    return timer(400).pipe(
+                        tap(() => this.tokenChecking.set(true)),
+                        switchMap(() =>
+                            this.dadata.suggestAddress({query: 'Москва', count: 1}),
+                        ),
+                        tap(() => {
+                            this.tokenValid.set(true);
+                            this.tokenError.set('');
+                            localStorage.setItem(DADATA_TOKEN_STORAGE_KEY, token);
+                        }),
+                        catchError((error: HttpErrorResponse) => {
+                            this.tokenValid.set(false);
+                            this.tokenError.set(this.getTokenErrorMessage(error));
+
+                            if (error.status === 401 || error.status === 403) {
+                                localStorage.removeItem(DADATA_TOKEN_STORAGE_KEY);
+                            }
+
+                            return EMPTY;
+                        }),
+                        finalize(() => this.tokenChecking.set(false)),
+                    );
+                }),
+                takeUntilDestroyed(),
+            )
+            .subscribe();
+
+        const token = localStorage.getItem(DADATA_TOKEN_STORAGE_KEY) ?? '';
+
+        if (token) {
+            this.token.set(token);
+            this.tokenValid.set(true);
+            this.tokenChanges$.next(token);
+        }
+    }
+
+    protected onTokenChange(value: string): void {
+        const token = value.trim();
+
+        this.token.set(token);
+        this.tokenValid.set(false);
+        this.tokenError.set('');
+
+        if (!token) {
+            localStorage.removeItem(DADATA_TOKEN_STORAGE_KEY);
+        }
+
+        this.tokenChanges$.next(token);
+    }
+
     protected isSuggestion(
         value: TuiDaDataAddressSuggestion | string | null,
     ): value is TuiDaDataAddressSuggestion {
@@ -94,7 +163,25 @@ export class AppComponent {
             return 'Сначала укажите API-токен DaData';
         }
 
+        if (!this.tokenValid()) {
+            return this.tokenChecking()
+                ? 'Проверяем API-токен DaData'
+                : 'Укажите действительный API-токен DaData';
+        }
+
         return query.length < 2 ? 'Введите минимум 2 символа' : 'Ничего не найдено';
+    }
+
+    private getTokenErrorMessage(error: HttpErrorResponse): string {
+        if (error.status === 401 || error.status === 403) {
+            return 'DaData отклонила API-токен. Проверьте его и попробуйте снова.';
+        }
+
+        if (error.status === 429) {
+            return 'Слишком много запросов к DaData. Проверим токен еще раз после следующего изменения.';
+        }
+
+        return 'Не удалось проверить API-токен. Проверьте соединение и попробуйте снова.';
     }
 
     private getErrorMessage(error: HttpErrorResponse): string {
