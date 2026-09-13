@@ -17,6 +17,7 @@
     "@angular/forms": "19.2.25",
     "@angular/platform-browser": "19.2.25",
     "@angular/platform-browser-dynamic": "19.2.25",
+    "@angular/router": "19.2.25",
     "@maskito/angular": "5.3.1",
     "@maskito/core": "5.3.1",
     "@maskito/kit": "5.3.1",
