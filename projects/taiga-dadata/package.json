@@ -1,7 +1,7 @@
 {
   "name": "@taiga-ui-labs/dadata",
   "version": "0.0.0",
-  "description": "DaData API integration for Taiga UI",
+  "description": "Интеграция API DaData для Angular и Taiga UI",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
