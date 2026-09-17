@@ -123,23 +123,6 @@ const banks$ = dadata.suggestBank({
 provideTuiDaData({token: () => tokenSignal()});
 ```
 
-## Разработка
-
-```bash
-npm ci
-npm start
-```
-
-Сборка библиотеки и демо:
-
-```bash
-npm run build
-```
-
-## GitHub Pages
-
-`.github/workflows/pages.yml` собирает демо с `/taiga-dadata/` в качестве `base href` и публикует `dist/demo` через GitHub Pages Actions.
-
 ## Возможности
 
 Библиотека предоставляет типизированные подсказки адресов, ФИО, организаций и банков. Для остальных API подсказок DaData можно использовать универсальный метод `suggest<T, R>(type, request)` без создания отдельных UI-компонентов.
