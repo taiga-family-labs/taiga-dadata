@@ -13,6 +13,11 @@ import {
     type TuiDaDataEmailSuggestRequest,
     type TuiDaDataEndpointMap,
     type TuiDaDataEndpointType,
+    type TuiDaDataFindAddressRequest,
+    type TuiDaDataFindBankRequest,
+    type TuiDaDataFindByIdEndpointMap,
+    type TuiDaDataFindByIdEndpointType,
+    type TuiDaDataFindPartyRequest,
     type TuiDaDataFioData,
     type TuiDaDataFioSuggestRequest,
     type TuiDaDataPartyData,
@@ -55,6 +60,39 @@ export class TuiDaDataService {
         return this.suggest('email', request);
     }
 
+    public findAddressById(
+        request: TuiDaDataFindAddressRequest,
+    ): Observable<TuiDaDataResponse<TuiDaDataAddressData>> {
+        return this.findById('address', request);
+    }
+
+    public findPartyById(
+        request: TuiDaDataFindPartyRequest,
+    ): Observable<TuiDaDataResponse<TuiDaDataPartyData>> {
+        return this.findById('party', request);
+    }
+
+    public findBankById(
+        request: TuiDaDataFindBankRequest,
+    ): Observable<TuiDaDataResponse<TuiDaDataBankData>> {
+        return this.findById('bank', request);
+    }
+
+    public findById<K extends TuiDaDataFindByIdEndpointType>(
+        type: K,
+        request: TuiDaDataFindByIdEndpointMap[K]['request'],
+    ): Observable<TuiDaDataResponse<TuiDaDataFindByIdEndpointMap[K]['data']>>;
+    public findById<T, R extends TuiDaDataBaseSuggestRequest = TuiDaDataBaseSuggestRequest>(
+        type: string,
+        request: R,
+    ): Observable<TuiDaDataResponse<T>>;
+    public findById<T>(
+        type: string,
+        request: TuiDaDataBaseSuggestRequest,
+    ): Observable<TuiDaDataResponse<T>> {
+        return this.request<T>('findById', type, request);
+    }
+
     public suggest<K extends TuiDaDataEndpointType>(
         type: K,
         request: TuiDaDataEndpointMap[K]['request'],
@@ -67,13 +105,21 @@ export class TuiDaDataService {
         type: string,
         request: TuiDaDataBaseSuggestRequest,
     ): Observable<TuiDaDataResponse<T>> {
+        return this.request<T>('suggest', type, request);
+    }
+
+    private request<T>(
+        method: 'findById' | 'suggest',
+        type: string,
+        request: TuiDaDataBaseSuggestRequest,
+    ): Observable<TuiDaDataResponse<T>> {
         const token =
             typeof this.options.token === 'function'
                 ? this.options.token()
                 : this.options.token;
 
         return this.http.post<TuiDaDataResponse<T>>(
-            `${this.options.baseUrl ?? TUI_DADATA_BASE_URL}/suggest/${type}`,
+            `${this.options.baseUrl ?? TUI_DADATA_BASE_URL}/${method}/${type}`,
             request,
             {
                 headers: new HttpHeaders({

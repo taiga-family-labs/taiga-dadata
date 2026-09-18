@@ -150,6 +150,54 @@ const addresses$ = dadata.suggest('address', {
 Для нестандартных endpoints остается универсальная сигнатура
 `suggest<T, R>(type, request)`.
 
+### Поиск по идентификатору
+
+Сохраненную подсказку можно восстановить по ФИАС/КЛАДР, ИНН/ОГРН, БИК, SWIFT
+или другому поддерживаемому идентификатору:
+
+```ts
+const address$ = dadata.findAddressById({
+    query: '9120b43f-2fae-4838-a144-85e43c2bfb29',
+});
+
+const party$ = dadata.findPartyById({
+    query: '7707083893',
+    branch_type: 'MAIN',
+});
+
+const bank$ = dadata.findBankById({
+    query: '044525225',
+});
+```
+
+Метод `findById(type, request)` также автоматически выводит тип запроса и ответа
+для `address`, `party` и `bank`.
+
+### Реактивный поиск
+
+Оператор `tuiDaDataSearch` добавляет нормализацию запроса, debounce, отмену
+предыдущего HTTP-запроса и состояния `idle`, `loading`, `success`, `error`:
+
+```ts
+import {tuiDaDataSearch} from '@taiga-ui-labs/dadata';
+import {Subject} from 'rxjs';
+
+protected readonly query$ = new Subject<string>();
+
+protected readonly state$ = this.query$.pipe(
+    tuiDaDataSearch(
+        (query) => dadata.suggestAddress({query, count: 10}),
+        {debounce: 300, minLength: 2},
+    ),
+);
+```
+
+Каждое состояние содержит нормализованный `query` и массив `suggestions`. Состояние
+`error` дополнительно содержит исходную ошибку в поле `error`.
+
+`TuiDaDataAddressData` описывает полный ответ адресного API, включая ФИАС/КЛАДР,
+муниципальное деление, кадастровые данные, координаты, метро и тарифные поля.
+
 Если токен может меняться во время работы приложения, можно передать функцию:
 
 ```ts
