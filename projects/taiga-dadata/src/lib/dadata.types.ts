@@ -9,7 +9,57 @@ export interface TuiDaDataSuggestRequest extends TuiDaDataBaseSuggestRequest {
     readonly language?: TuiDaDataLanguage;
 }
 
-export type TuiDaDataAddressSuggestRequest = TuiDaDataSuggestRequest;
+export type TuiDaDataAddressBoundValue =
+    | 'area'
+    | 'city'
+    | 'country'
+    | 'flat'
+    | 'house'
+    | 'planning_structure'
+    | 'region'
+    | 'settlement'
+    | 'stead'
+    | 'street';
+
+export interface TuiDaDataAddressBound {
+    readonly value: TuiDaDataAddressBoundValue;
+}
+
+export type TuiDaDataAddressDivision = 'administrative' | 'municipal';
+
+export interface TuiDaDataAddressLocation {
+    readonly area?: string;
+    readonly area_fias_id?: string;
+    readonly city?: string;
+    readonly city_district?: string;
+    readonly city_district_fias_id?: string;
+    readonly city_fias_id?: string;
+    readonly country_iso_code?: string;
+    readonly fias_id?: string;
+    readonly kladr_id?: string;
+    readonly region?: string;
+    readonly region_fias_id?: string;
+    readonly settlement?: string;
+    readonly settlement_fias_id?: string;
+    readonly street?: string;
+    readonly street_fias_id?: string;
+}
+
+export interface TuiDaDataAddressGeoLocation {
+    readonly lat: number;
+    readonly lon: number;
+    readonly radius_meters: number;
+}
+
+export interface TuiDaDataAddressSuggestRequest extends TuiDaDataSuggestRequest {
+    readonly division?: TuiDaDataAddressDivision;
+    readonly from_bound?: TuiDaDataAddressBound;
+    readonly locations?: readonly TuiDaDataAddressLocation[];
+    readonly locations_boost?: readonly TuiDaDataAddressLocation[];
+    readonly locations_geo?: readonly TuiDaDataAddressGeoLocation[];
+    readonly restrict_value?: boolean;
+    readonly to_bound?: TuiDaDataAddressBound;
+}
 
 export interface TuiDaDataSuggestion<T> {
     readonly value: string;
@@ -64,6 +114,18 @@ export interface TuiDaDataFioData {
 }
 
 export type TuiDaDataFioSuggestion = TuiDaDataSuggestion<TuiDaDataFioData>;
+
+export type TuiDaDataEmailSuggestRequest = TuiDaDataBaseSuggestRequest;
+
+export interface TuiDaDataEmailData {
+    readonly local: string | null;
+    readonly domain: string | null;
+    readonly type: string | null;
+    readonly source: string | null;
+    readonly qc: string | null;
+}
+
+export type TuiDaDataEmailSuggestion = TuiDaDataSuggestion<TuiDaDataEmailData>;
 
 export type TuiDaDataPartyType = 'INDIVIDUAL' | 'LEGAL';
 export type TuiDaDataPartyBranchType = 'BRANCH' | 'MAIN';
@@ -187,3 +249,24 @@ export interface TuiDaDataBankData {
 }
 
 export type TuiDaDataBankSuggestion = TuiDaDataSuggestion<TuiDaDataBankData>;
+
+export interface TuiDaDataEndpoint<
+    TRequest extends TuiDaDataBaseSuggestRequest,
+    TData,
+> {
+    readonly request: TRequest;
+    readonly data: TData;
+}
+
+export interface TuiDaDataEndpointMap {
+    readonly address: TuiDaDataEndpoint<
+        TuiDaDataAddressSuggestRequest,
+        TuiDaDataAddressData
+    >;
+    readonly bank: TuiDaDataEndpoint<TuiDaDataBankSuggestRequest, TuiDaDataBankData>;
+    readonly email: TuiDaDataEndpoint<TuiDaDataEmailSuggestRequest, TuiDaDataEmailData>;
+    readonly fio: TuiDaDataEndpoint<TuiDaDataFioSuggestRequest, TuiDaDataFioData>;
+    readonly party: TuiDaDataEndpoint<TuiDaDataPartySuggestRequest, TuiDaDataPartyData>;
+}
+
+export type TuiDaDataEndpointType = keyof TuiDaDataEndpointMap;

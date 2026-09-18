@@ -92,7 +92,24 @@ protected readonly suggestions$ = dadata.suggestAddress({
 </ng-template>
 ```
 
-### ФИО, организации и банки
+### Адресные ограничения
+
+Адресный метод поддерживает гранулярный поиск, ограничение области и приоритет
+локаций:
+
+```ts
+const streets$ = dadata.suggestAddress({
+    query: 'Тверская',
+    from_bound: {value: 'street'},
+    to_bound: {value: 'house'},
+    locations: [{city_fias_id: '0c5b2444-70a0-4932-980c-b4dc0d3f02b5'}],
+    restrict_value: true,
+});
+```
+
+Также доступны `division`, `locations_boost` и `locations_geo`.
+
+### ФИО, организации, банки и email
 
 Для основных видов подсказок есть отдельные типизированные методы:
 
@@ -113,9 +130,25 @@ const banks$ = dadata.suggestBank({
     type: ['BANK'],
     status: ['ACTIVE'],
 });
+
+const emails$ = dadata.suggestEmail({
+    query: 'example@yand',
+});
 ```
 
-Ответы типизированы через `TuiDaDataFioData`, `TuiDaDataPartyData` и `TuiDaDataBankData`. Для нестандартных endpoints остается универсальный метод `suggest<T, R>(type, request)`.
+Ответы типизированы через `TuiDaDataFioData`, `TuiDaDataPartyData`,
+`TuiDaDataBankData` и `TuiDaDataEmailData`.
+
+Метод `suggest` автоматически выводит тип запроса и ответа для известных endpoints:
+
+```ts
+const addresses$ = dadata.suggest('address', {
+    query: 'Москва, Тверская',
+});
+```
+
+Для нестандартных endpoints остается универсальная сигнатура
+`suggest<T, R>(type, request)`.
 
 Если токен может меняться во время работы приложения, можно передать функцию:
 
@@ -125,4 +158,6 @@ provideTuiDaData({token: () => tokenSignal()});
 
 ## Возможности
 
-Библиотека предоставляет типизированные подсказки адресов, ФИО, организаций и банков. Для остальных API подсказок DaData можно использовать универсальный метод `suggest<T, R>(type, request)` без создания отдельных UI-компонентов.
+Библиотека предоставляет типизированные подсказки адресов, ФИО, организаций,
+банков и email. Для остальных API подсказок DaData можно использовать универсальный
+метод `suggest<T, R>(type, request)` без создания отдельных UI-компонентов.
