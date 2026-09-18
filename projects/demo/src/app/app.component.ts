@@ -16,6 +16,7 @@ import {
     TuiDaDataService,
     type TuiDaDataAddressSuggestion,
     type TuiDaDataBankSuggestion,
+    type TuiDaDataEmailSuggestion,
     type TuiDaDataFioSuggestion,
     type TuiDaDataPartySuggestion,
 } from '@taiga-ui-labs/dadata';
@@ -44,12 +45,14 @@ const SUGGESTION_TYPES = [
     {id: 'fio', label: 'ФИО', placeholder: 'Иванов Иван Иванович'},
     {id: 'party', label: 'Организация', placeholder: 'Сбербанк'},
     {id: 'bank', label: 'Банк', placeholder: 'Сбербанк'},
+    {id: 'email', label: 'Email', placeholder: 'example@yand'},
 ] as const;
 
 type SuggestionType = (typeof SUGGESTION_TYPES)[number]['id'];
 type Suggestion =
     | TuiDaDataAddressSuggestion
     | TuiDaDataBankSuggestion
+    | TuiDaDataEmailSuggestion
     | TuiDaDataFioSuggestion
     | TuiDaDataPartySuggestion;
 
@@ -231,6 +234,11 @@ export class AppComponent {
                     .filter(Boolean)
                     .join(' · ');
             }
+            case 'email': {
+                const {domain} = (suggestion as TuiDaDataEmailSuggestion).data;
+
+                return domain ?? '';
+            }
         }
     }
 
@@ -265,6 +273,10 @@ export class AppComponent {
             case 'bank':
                 return this.dadata
                     .suggestBank({query, count: 10, status: ['ACTIVE']})
+                    .pipe(map(({suggestions}) => suggestions));
+            case 'email':
+                return this.dadata
+                    .suggestEmail({query, count: 10})
                     .pipe(map(({suggestions}) => suggestions));
         }
     }

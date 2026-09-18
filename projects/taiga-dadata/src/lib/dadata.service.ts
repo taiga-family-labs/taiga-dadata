@@ -9,6 +9,10 @@ import {
     type TuiDaDataBankData,
     type TuiDaDataBankSuggestRequest,
     type TuiDaDataBaseSuggestRequest,
+    type TuiDaDataEmailData,
+    type TuiDaDataEmailSuggestRequest,
+    type TuiDaDataEndpointMap,
+    type TuiDaDataEndpointType,
     type TuiDaDataFioData,
     type TuiDaDataFioSuggestRequest,
     type TuiDaDataPartyData,
@@ -24,30 +28,44 @@ export class TuiDaDataService {
     public suggestAddress(
         request: TuiDaDataAddressSuggestRequest,
     ): Observable<TuiDaDataResponse<TuiDaDataAddressData>> {
-        return this.suggest<TuiDaDataAddressData>('address', request);
+        return this.suggest('address', request);
     }
 
     public suggestFio(
         request: TuiDaDataFioSuggestRequest,
     ): Observable<TuiDaDataResponse<TuiDaDataFioData>> {
-        return this.suggest<TuiDaDataFioData>('fio', request);
+        return this.suggest('fio', request);
     }
 
     public suggestParty(
         request: TuiDaDataPartySuggestRequest,
     ): Observable<TuiDaDataResponse<TuiDaDataPartyData>> {
-        return this.suggest<TuiDaDataPartyData>('party', request);
+        return this.suggest('party', request);
     }
 
     public suggestBank(
         request: TuiDaDataBankSuggestRequest,
     ): Observable<TuiDaDataResponse<TuiDaDataBankData>> {
-        return this.suggest<TuiDaDataBankData>('bank', request);
+        return this.suggest('bank', request);
     }
 
+    public suggestEmail(
+        request: TuiDaDataEmailSuggestRequest,
+    ): Observable<TuiDaDataResponse<TuiDaDataEmailData>> {
+        return this.suggest('email', request);
+    }
+
+    public suggest<K extends TuiDaDataEndpointType>(
+        type: K,
+        request: TuiDaDataEndpointMap[K]['request'],
+    ): Observable<TuiDaDataResponse<TuiDaDataEndpointMap[K]['data']>>;
     public suggest<T, R extends TuiDaDataBaseSuggestRequest = TuiDaDataBaseSuggestRequest>(
         type: string,
         request: R,
+    ): Observable<TuiDaDataResponse<T>>;
+    public suggest<T>(
+        type: string,
+        request: TuiDaDataBaseSuggestRequest,
     ): Observable<TuiDaDataResponse<T>> {
         const token =
             typeof this.options.token === 'function'
