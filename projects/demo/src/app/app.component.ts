@@ -14,15 +14,22 @@ import {TuiInput, TuiLoader, TuiRoot} from '@taiga-ui/core';
 import {TuiChevron, TuiComboBox, TuiDataListWrapper} from '@taiga-ui/kit';
 import {
     TuiDaDataService,
+    tuiDaDataSearch,
+    type TuiDaDataAddressData,
     type TuiDaDataAddressSuggestion,
+    type TuiDaDataBankData,
     type TuiDaDataBankSuggestion,
+    type TuiDaDataEmailData,
     type TuiDaDataEmailSuggestion,
+    type TuiDaDataFioData,
     type TuiDaDataFioSuggestion,
+    type TuiDaDataPartyData,
     type TuiDaDataPartySuggestion,
+    type TuiDaDataResponse,
+    type TuiDaDataSuggestion,
 } from '@taiga-ui-labs/dadata';
 import {
     catchError,
-    debounceTime,
     distinctUntilChanged,
     EMPTY,
     filter,
@@ -49,12 +56,13 @@ const SUGGESTION_TYPES = [
 ] as const;
 
 type SuggestionType = (typeof SUGGESTION_TYPES)[number]['id'];
-type Suggestion =
-    | TuiDaDataAddressSuggestion
-    | TuiDaDataBankSuggestion
-    | TuiDaDataEmailSuggestion
-    | TuiDaDataFioSuggestion
-    | TuiDaDataPartySuggestion;
+type SuggestionData =
+    | TuiDaDataAddressData
+    | TuiDaDataBankData
+    | TuiDaDataEmailData
+    | TuiDaDataFioData
+    | TuiDaDataPartyData;
+type Suggestion = TuiDaDataSuggestion<SuggestionData>;
 
 @Component({
     selector: 'app-root',
@@ -97,30 +105,23 @@ export class AppComponent {
     protected readonly stringify: TuiStringHandler<Suggestion> = ({value}) => value;
 
     protected readonly suggestions$ = this.search$.pipe(
-        debounceTime(0),
         filter(() => !this.isSuggestion(this.value)),
-        map((query) => query.trim()),
-        debounceTime(300),
-        distinctUntilChanged(),
-        switchMap((query) => {
-            if (query.length < 2 || !this.tokenValid()) {
-                this.error.set('');
-
-                return of<readonly Suggestion[]>([]);
+        tuiDaDataSearch((query) => {
+            if (!this.tokenValid()) {
+                return of<TuiDaDataResponse<SuggestionData>>({suggestions: []});
             }
 
-            this.loading.set(true);
-            this.error.set('');
-
-            return this.getSuggestions(query).pipe(
-                catchError((error: HttpErrorResponse) => {
-                    this.error.set(this.getErrorMessage(error));
-
-                    return of<readonly Suggestion[]>([]);
-                }),
-                finalize(() => this.loading.set(false)),
+            return this.getSuggestions(query);
+        }),
+        tap((state) => {
+            this.loading.set(state.status === 'loading');
+            this.error.set(
+                state.status === 'error' && state.error instanceof HttpErrorResponse
+                    ? this.getErrorMessage(state.error)
+                    : '',
             );
         }),
+        map(({suggestions}) => suggestions),
         shareReplay({bufferSize: 1, refCount: true}),
     );
 
@@ -256,28 +257,18 @@ export class AppComponent {
         return query.length < 2 ? 'Введите минимум 2 символа' : 'Ничего не найдено';
     }
 
-    private getSuggestions(query: string): Observable<readonly Suggestion[]> {
+    private getSuggestions(query: string): Observable<TuiDaDataResponse<SuggestionData>> {
         switch (this.suggestionType()) {
             case 'address':
-                return this.dadata
-                    .suggestAddress({query, count: 10})
-                    .pipe(map(({suggestions}) => suggestions));
+                return this.dadata.suggestAddress({query, count: 10});
             case 'fio':
-                return this.dadata
-                    .suggestFio({query, count: 10})
-                    .pipe(map(({suggestions}) => suggestions));
+                return this.dadata.suggestFio({query, count: 10});
             case 'party':
-                return this.dadata
-                    .suggestParty({query, count: 10, status: ['ACTIVE']})
-                    .pipe(map(({suggestions}) => suggestions));
+                return this.dadata.suggestParty({query, count: 10, status: ['ACTIVE']});
             case 'bank':
-                return this.dadata
-                    .suggestBank({query, count: 10, status: ['ACTIVE']})
-                    .pipe(map(({suggestions}) => suggestions));
+                return this.dadata.suggestBank({query, count: 10, status: ['ACTIVE']});
             case 'email':
-                return this.dadata
-                    .suggestEmail({query, count: 10})
-                    .pipe(map(({suggestions}) => suggestions));
+                return this.dadata.suggestEmail({query, count: 10});
         }
     }
 
